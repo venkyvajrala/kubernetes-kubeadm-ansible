@@ -1,0 +1,34 @@
+---
+# tasks file for homebrew
+
+- name: Print OS family
+  ansible.builtin.debug:
+    var: ansible_os_family
+
+- name: Check operating system
+  ansible.builtin.fail:
+    msg: " {{ ansible_os_family }} doesn't support this installation. Supported platforms: Darwin"
+  when: ansible_os_family != 'Darwin'
+
+- name: "Check Homebrew installation"
+  ansible.builtin.stat:
+    path: /opt/homebrew/bin/brew
+  register: brew_installation
+
+- name: Fail if Home brew is not installed and brew installation is skipped
+  ansible.builtin.fail:
+    msg: "Homebrew installation not found! Install from brew.sh {{ brew_installation.stat.exists }}"
+  when:
+    - not brew_installation.stat.exists
+    - not install_homebrew_if_missing
+
+# if below tasks fails to download install.sh file then you can download from github https://github.com/Homebrew/install/blob/master/install.sh
+# and run the command to install homebrew
+- name: Install Homebrew
+  ansible.builtin.command:
+    cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - install_homebrew_if_missing
+    - not brew_installation.stat.exists

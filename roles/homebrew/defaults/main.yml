@@ -1,0 +1,3 @@
+---
+# defaults file for homebrew
+install_homebrew_if_missing: true

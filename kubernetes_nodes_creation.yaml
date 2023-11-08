@@ -1,0 +1,6 @@
+---
+
+- name: Create ubuntu VM's
+  hosts: localhost
+  roles:
+    - compute_resources
