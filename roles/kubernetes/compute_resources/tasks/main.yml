@@ -1,0 +1,50 @@
+---
+# tasks file for compute-resources
+
+- name: Check available memory
+  ansible.builtin.fail:
+    msg: 'Not enough Memory to spinup cluster. Need atleast 8GB RAM'
+  failed_when: ansible_facts['memtotal_mb']/1024 < 8
+
+- name: Check CPU cores
+  ansible.builtin.fail:
+    msg: 'Not enough CPU cores available. Need atleast 8 CPU cores'
+  failed_when: ansible_facts['processor_cores'] | int < 8
+
+- name: Get existing nodes
+  ansible.builtin.command:
+    cmd: multipass list --format json
+  changed_when: output.rc !=0
+  register: output
+
+- name: Delete existing nodes if found
+  ansible.builtin.command:
+    cmd: 'multipass delete -p {{ item }}'
+  register: output
+  changed_when: output.rc == 0
+  with_items: "{{ output.stdout | from_json | json_query('list[].name') | list }}"
+
+- name: Launch instances
+  ansible.builtin.command:
+    cmd: multipass launch --name {{ item }} --cpus 2 --memory 2G
+  changed_when: output.rc == 0
+  register: output
+  with_items: '{{ nodes }}'
+
+- name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+  community.crypto.openssh_keypair:
+    path: ~/.ssh/kubernetes
+
+- name: Allow SSH access to and between instances
+  ansible.builtin.command:
+    cmd: 'bash {{ role_path }}/files/enable_ssh_key_based_authentication_to_and_between_nodes.sh -n {{ item }}'
+  register: output
+  changed_when: output.rc ==0
+  with_items: '{{ nodes }}'
+
+- name: Add DNS resolutions between nodes
+  ansible.builtin.command:
+    cmd: 'bash {{ role_path }}/files/enable_dns_resolution_between_nodes.sh -n {{ item }}'
+  register: output
+  changed_when: output.rc == 0
+  with_items: '{{ nodes }}'

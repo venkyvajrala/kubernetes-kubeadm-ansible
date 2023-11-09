@@ -1,10 +1,5 @@
 ---
 # tasks file for homebrew
-
-- name: Print OS family
-  ansible.builtin.debug:
-    var: ansible_os_family
-
 - name: Check operating system
   ansible.builtin.fail:
     msg: " {{ ansible_os_family }} doesn't support this installation. Supported platforms: Darwin"
@@ -17,7 +12,7 @@
 
 - name: Fail if Home brew is not installed and brew installation is skipped
   ansible.builtin.fail:
-    msg: "Homebrew installation not found! Install from brew.sh {{ brew_installation.stat.exists }}"
+    msg: "Homebrew installation not found! Install from brew.sh"
   when:
     - not brew_installation.stat.exists
     - not install_homebrew_if_missing
@@ -32,3 +27,13 @@
   when:
     - install_homebrew_if_missing
     - not brew_installation.stat.exists
+
+- name: Install multipass VM management tool
+  community.general.homebrew_cask:
+    name: multipass
+    state: present
+
+- name: Install jq Json parser
+  community.general.homebrew:
+    name: jq
+    state: present

@@ -1,0 +1,6 @@
+---
+# defaults file for compute-resources
+nodes:
+    - controlplane
+    - worker01
+    - worker02
