@@ -12,3 +12,21 @@
   remote_user: ubuntu
   roles:
     - kubernetes/common
+- name: Configure controlplane
+  hosts: kube_master_nodes
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - kubernetes/master
+
+- name: Setup networking
+  hosts: kube_master_nodes
+  remote_user: ubuntu
+  roles:
+    - network/flannel
+
+- name: Configure worker nodes
+  hosts: kube_worker_nodes
+  remote_user: ubuntu
+  roles:
+    - kubernetes/worker
