@@ -1,0 +1,33 @@
+---
+- name: Add Apt signing key on remote server to keyring registry.k8s.io
+  ansible.builtin.apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: present
+
+- name: Add k8s apt repo
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/kubernetes.list
+    state: present
+    line: 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /'
+    create: true
+    mode: u=rw,g=r,o=r
+
+- name: Install kubelet kubeadm kubectl
+  ansible.builtin.apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items:
+    - kubelet
+    - kubectl
+    - kubeadm
+
+- name: Pin versions
+  ansible.builtin.dpkg_selections:
+    name: '{{ item }}'
+    selection: hold
+  with_items:
+    - kubelet
+    - kubectl
+    - kubeadm

@@ -1,0 +1,12 @@
+---
+# handlers file for common
+- name: Reread the systemd configs
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Start swap service
+  ansible.builtin.systemd:
+    name: swap-disable
+    enabled: true
+    state: started
+    daemon_reload: true

@@ -5,3 +5,10 @@
   remote_user: ubuntu
   roles:
     - cri/containerd
+
+- name: Setup kubelet kubectl kubeadm on all nodes
+  hosts: kube_nodes
+  become: yes
+  remote_user: ubuntu
+  roles:
+    - kubernetes/common

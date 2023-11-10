@@ -1,0 +1,10 @@
+---
+# tasks file for common
+
+- name: Create systemd service for swap disable
+  ansible.builtin.include_tasks:
+    file: disable_swap.yml
+
+- name: Install kube components kubelet,kubectl and kubeadm
+  ansible.builtin.include_tasks:
+    file: kube_components.yml

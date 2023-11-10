@@ -1,0 +1,10 @@
+---
+- name: Create systemd service for swap disable
+  become: yes
+  ansible.builtin.copy:
+    src: swap-disable.service
+    dest: /etc/systemd/system/swap-disable.service
+    mode: u=rw,g=r,o=r
+  notify:
+    - Reread the systemd configs
+    - Start swap service
