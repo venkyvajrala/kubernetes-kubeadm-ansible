@@ -1,6 +1,5 @@
 ---
-
-- name: Create ubuntu VM's
+- name: Create cluster instances
   hosts: localhost
   roles:
-    - kubernetes/compute_resources
+    - compute_resources
