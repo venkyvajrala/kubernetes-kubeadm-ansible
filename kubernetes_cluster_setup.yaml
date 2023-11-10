@@ -1,0 +1,7 @@
+---
+- name: Setup container runtime for nodes
+  hosts: kube_nodes
+  become: yes
+  remote_user: ubuntu
+  roles:
+    - cri/containerd
