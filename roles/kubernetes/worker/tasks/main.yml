@@ -1,0 +1,30 @@
+---
+- name: Get kubeadm join token
+  ansible.builtin.command:
+    cmd: kubeadm token create
+  register: join_token
+  changed_when: join_token.rc !=0
+  delegate_to: "{{ groups['kube_master_nodes'] | first }}"
+
+- name: Print token
+  ansible.builtin.debug:
+    var: join_token
+
+- name: Get Discovery token hash
+  ansible.builtin.shell:
+    cmd: |
+      openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: discovery_token_hash
+  delegate_to: "{{ groups['kube_master_nodes'] | first }}"
+
+- name: Print hash token
+  ansible.builtin.debug:
+    var: discovery_token_hash
+
+- name: Join worker node to cluster
+  ansible.builtin.command:
+    cmd: 'kubeadm join controlplane:6443 --token {{ join_token.stdout }} --discovery-token-ca-cert-hash sha256:{{ discovery_token_hash.stdout }}'
+    creates: /etc/kubernetes/pki/ca.crt
+  register: output
+  changed_when: output.rc !=0
+  become: yes
