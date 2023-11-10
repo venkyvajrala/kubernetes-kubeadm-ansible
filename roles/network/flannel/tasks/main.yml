@@ -1,0 +1,21 @@
+---
+- name: Download flannel manifest file
+  ansible.builtin.get_url:
+    url: https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    dest: ~/
+    validate_certs: no
+    mode: u=rw,g=r,o=r
+    force: true
+
+- name: Update pod CIDR in manifest file
+  ansible.builtin.lineinfile:
+    path: ~/kube-flannel.yml
+    line: '      "Network": "10.32.0.0/16",'
+    regexp: '^\s*\"Network\":\s*\".*?\",\s*$'
+
+- name: Deploy flannel network
+  remote_user: ubuntu
+  kubernetes.core.k8s:
+  ansible.builtin.add_host:
+    state: present
+    src: kube-flannel.yml
