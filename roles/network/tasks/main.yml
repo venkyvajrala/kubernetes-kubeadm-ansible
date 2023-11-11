@@ -1,0 +1,12 @@
+---
+# tasks file for network
+
+- name: Add flannel networking to the cluster
+  ansible.builtin.include_tasks:
+    file: flannel-network.yml
+  when: network_solution == "flannel"
+
+- name: Add flannel networking to the cluster
+  ansible.builtin.include_tasks:
+    file: flannel-network.yml
+  when: network_solution == "weave-net"

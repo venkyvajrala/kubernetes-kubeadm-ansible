@@ -1,0 +1,12 @@
+---
+- name: Copy weave-net manifest file
+  ansible.builtin.template:
+    src: weave-daemonset-k8s.yaml.j2
+    dest: '{{ network_manifest_path }}'
+    mode: u=rw,g=r,o=r
+
+- name: Deploy weave-net network
+  remote_user: ubuntu
+  kubernetes.core.k8s:
+    state: present
+    src: '{{ network_manifest_path }}'

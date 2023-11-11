@@ -1,0 +1,6 @@
+pod_network_cidr : 10.32.0.0/12
+pod_cidr_subnet : 10.32.0.0/16
+network_solution: flannel
+
+service_account: ubuntu
+master_node: controlplane
