@@ -6,9 +6,7 @@
     name: '{{ item }}'
     state: present
     persistent: present
-  with_items:
-    - overlay
-    - br_netfilter
+  with_items: '{{ kernel_modules }}'
 
 - name: Set ip forward
   ansible.posix.sysctl:
@@ -39,14 +37,9 @@
     name: '{{ item }}'
     state: present
     update_cache: yes
-  with_items:
-    - ca-certificates
-    - curl
-    - gnupg
-    - gpg
-    - apt-transport-https
+  with_items: '{{ containerd_prerequisites }}'
 
-- name: Add key rings
+- name: Add apt key rings
   ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
@@ -58,7 +51,7 @@
     keyring: /etc/apt/keyrings/docker.gpg
     state: present
 
-- name: Chnage permissions
+- name: Update permissions of apt docker keyrings to execute
   ansible.builtin.file:
     path: /etc/apt/keyrings/docker.gpg
     mode: a+r
@@ -69,7 +62,7 @@
   register: output
   changed_when: output.rc !=0
 
-- name: Set fact
+- name: Set system architecture fact
   ansible.builtin.set_fact:
     docker_repo: 'deb [arch={{ output.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable'
 
@@ -90,14 +83,14 @@
     name: containerd
     state: started
 
-- name: Create containerd config
+- name: Update containerd config to default values
   ansible.builtin.shell:
     cmd: containerd config default > /etc/containerd/config.toml
   register: output
   changed_when: output.rc != 0
   notify: Restart containerd
 
-- name: Update systemd swap
+- name: Update Systemd as Cgroup driver
   ansible.builtin.lineinfile:
     line: '            SystemdCgroup = true'
     regexp: '^.*SystemdCgroup.*'

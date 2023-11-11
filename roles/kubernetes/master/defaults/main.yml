@@ -1,0 +1,1 @@
+kube_directory: "/home/{{ service_account }}/.kube"

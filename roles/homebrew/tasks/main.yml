@@ -5,14 +5,14 @@
     msg: " {{ ansible_os_family }} doesn't support this installation. Supported platforms: Darwin"
   when: ansible_os_family != 'Darwin'
 
-- name: "Check Homebrew installation"
+- name: 'Check Homebrew installation'
   ansible.builtin.stat:
     path: /opt/homebrew/bin/brew
   register: brew_installation
 
 - name: Fail if Home brew is not installed and brew installation is skipped
   ansible.builtin.fail:
-    msg: "Homebrew installation not found! Install from brew.sh"
+    msg: 'Homebrew installation not found! Install from brew.sh'
   when:
     - not brew_installation.stat.exists
     - not install_homebrew_if_missing

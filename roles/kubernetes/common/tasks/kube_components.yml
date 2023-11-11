@@ -18,19 +18,13 @@
     name: '{{ item }}'
     state: present
     update_cache: yes
-  with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
+  with_items: '{{ kube_components }}'
 
-- name: Pin versions
+- name: Pin versions of kubelet kubeadm kubectl
   ansible.builtin.dpkg_selections:
     name: '{{ item }}'
     selection: hold
-  with_items:
-    - kubelet
-    - kubectl
-    - kubeadm
+  with_items: '{{ kube_components }}'
 
 - name: Install pip
   ansible.builtin.apt:

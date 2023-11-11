@@ -2,32 +2,32 @@
 - name: Setup container runtime for nodes
   hosts: kube_nodes
   become: yes
-  remote_user: ubuntu
+  remote_user: '{{ service_account }}'
   roles:
     - cri/containerd
 
 - name: Setup kubelet kubectl kubeadm on all nodes
   hosts: kube_nodes
   become: yes
-  remote_user: ubuntu
+  remote_user: '{{ service_account }}'
   roles:
     - kubernetes/common
 
 - name: Configure controlplane
   hosts: kube_master_nodes
-  remote_user: ubuntu
+  remote_user: '{{ service_account }}'
   become: yes
   roles:
     - kubernetes/master
 
 - name: Setup networking
   hosts: kube_master_nodes
-  remote_user: ubuntu
+  remote_user: '{{ service_account }}'
   roles:
     - network
 
 - name: Configure worker nodes
   hosts: kube_worker_nodes
-  remote_user: ubuntu
+  remote_user: '{{ service_account }}'
   roles:
     - kubernetes/worker

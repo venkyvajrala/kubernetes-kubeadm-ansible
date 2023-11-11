@@ -1,0 +1,4 @@
+kube_components:
+    - kubelet
+    - kubectl
+    - kubeadm

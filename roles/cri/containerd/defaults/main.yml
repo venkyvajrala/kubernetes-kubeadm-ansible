@@ -1,0 +1,10 @@
+kernel_modules:
+  - overlay
+  - br_netfilter
+
+containerd_prerequisites:
+    - ca-certificates
+    - curl
+    - gnupg
+    - gpg
+    - apt-transport-https
