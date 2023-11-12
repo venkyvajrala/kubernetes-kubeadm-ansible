@@ -8,5 +8,5 @@
 
 - name: Add weave-net networking to the cluster
   ansible.builtin.include_tasks:
-    file: flannel-network.yml
+    file: weavenet-network.yml
   when: network_solution == "weave-net"
