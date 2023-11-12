@@ -145,7 +145,7 @@ items:
                 - /home/weave/launch.sh
               env:
                 - name: IPALLOC_RANGE
-                  value: {{ POD_CIDR_SUBNET }}
+                  value: {{ pod_cidr_subnet }}
                 - name: INIT_CONTAINER
                   value: "true"
                 - name: HOSTNAME
