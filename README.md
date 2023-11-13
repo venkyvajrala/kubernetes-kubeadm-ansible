@@ -6,40 +6,51 @@ This repo contains two playbooks
 2. Kubernetes cluster setup
 
 ## Kubernetes nodes creation
+
 You can skip to [this](#kubernetes-cluster-setup) section, If you already have nodes created to setup cluster.
 
 System requirements:
-- Apple mac 
+
+- Apple mac
 - CPU >= 8
 - Memory >= 8GB
 
 **Note:** If you are on windows or linux you could follow [this](https://multipass.run/docs) guide to install multipass and create nodes.
+
 ### Usage
 
 By default this will create 3 nodes. You can update nodes count in `roles/compute_resources/defaults/main.yml` by adding/removing node_names
+
 ```yaml
 nodes:
-    - controlplane
-    - worker01
-    - worker02
-    - worker<n>
+  - controlplane
+  - worker01
+  - worker02
+  - worker<n>
 ```
+
 ```bash
 ansible-playbook kubernetes_nodes_creation.yaml
 ```
+
 This will create 3 virtual machines with Ubuntu 22.04 LTS.
+
 - 1 master node
-- 2 worker nodes 
+- 2 worker nodes
 
 It uses [multipass](https://multipass.run/docs) tool to create virtual machines.
 It will also enable passwordless SSH access between nodes.
 
+**Note:** Whenever you create virtual machines on mac , it will hold the ip address allocated to the machines and doesn't release automatically after virtual machines are deleted.You can release the ip address by removing the entries in `/var/db/dhcpd_leases` file in your mac.
+
 #### List nodes
 
 You could use below command to list the nodes created by multipass
+
 ```bash
 multipass list
 ```
+
 You should see output similar to below screenshot
 
 ![nodes details](./assets/node_details.png)
@@ -48,30 +59,35 @@ You should see output similar to below screenshot
 
 You can connect to instance using multipass or direct SSH.
 You could use below command to enter inside node using multipass
+
 ```bash
 multipass shell <node_name>
 ```
+
 You could also use SSH command.You can get ip address from `multipass list` command.Private key file `.ssh/kubernetes` will be created as part of the above Ansible play.
+
 ```bash
 ssh -i .ssh/kubernetes ubuntu@<ip_of_node>
 ```
 
-Once you are inside any one of the machine, you can access other machines by just using 
+Once you are inside any one of the machine, you can access other machines by just using
+
 ```bash
 ssh <node_name>
 # ssh controlplane
 # ssh worker01
 ```
+
 ## Kubernetes cluster setup
 
 We need 1 node for master and atleast 1 node to act as worker. All nodes should have below requirements satisified.
 System requirements:
+
 - Ubuntu or Debian OS
 - Passwordless SSH connectivity between nodes
 
-
-
 ### Usage
+
 Update `inventory.ini` file with node ip details
 
 ```ini
@@ -98,13 +114,40 @@ If you havent added dns resolution for nodes to access using node names then upd
 ```yaml
 master_node: <ip_of_the_master_node>
 ```
+
 You can also update networking solution you wish to deploy.Currently it supports flannel, weave-net
+
 ```yaml
 network_solution: <solution_name>
 ```
+
 Update SSH private_key_file path in your host machine in `ansible.cfg`. This will be used while access nodes from your machine.
 
 You can now run the playbook using below command to setup the cluster on your nodes
+
 ```bash
 ansible-playbook kubernetes_cluster_setup.yaml
+```
+
+If you want to run the workload from your host machine without entering inside controlplane then you can copy the kubeconfig to your local machine using below commands.
+
+```bash
+scp -i .ssh/<private_key_path> ubuntu@<controlplane_ip>:~/.kube/config .
+# scp -i .ssh/kubernetes ubuntu@192.168.64.14:~/.kube/config .
+```
+
+Update controlplane ip in the config file
+
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+    ...
+    server: https://<ip_of_controlplane>:6443
+```
+
+Now you can run the workloads from your host machine like below
+
+```bash
+kubectl --kubeconfig=config get all
 ```
